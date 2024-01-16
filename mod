@@ -76,7 +76,11 @@ def write(pp, path, data):
     with open(path, 'w') as f:
         f.write(json.dumps(d, indent=4, sort_keys=True))
 
-pswd = getpass.getpass()
+try:
+    pswd = runtext(['zenity', '--password']).strip()
+except Exception:
+    pswd = getpass.getpass()
+
 path = sys.argv[1]
 data = read(pswd, path)
 
