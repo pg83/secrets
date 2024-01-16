@@ -74,7 +74,7 @@ def write(pp, path, data):
     }
 
     with open(path, 'w') as f:
-        f.write(json.dumps(d, indent=4, sort_keys=True))
+        f.write(json.dumps(d, indent=4, sort_keys=True) + '\n')
 
 try:
     pswd = runtext(['zenity', '--password']).strip()
