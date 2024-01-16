@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import lzma
 import base64
 import getpass
 import subprocess
@@ -63,14 +64,14 @@ def read(pp, path):
 
     k = key(pp, d['salt'])
 
-    return decode(k['key'], k['iv'], base64.b64decode(d['data']))
+    return lzma.decompress(decode(k['key'], k['iv'], base64.b64decode(d['data'])))
 
 def write(pp, path, data):
     k = gen(pp)
 
     d = {
         'salt': k['salt'],
-        'data': base64.b64encode(encode(k['key'], k['iv'], data)).decode(),
+        'data': base64.b64encode(encode(k['key'], k['iv'], lzma.compress(data))).decode(),
     }
 
     with open(path, 'w') as f:
