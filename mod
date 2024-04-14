@@ -82,15 +82,17 @@ try:
 except Exception:
     pswd = getpass.getpass()
 
-path = sys.argv[1]
-data = read(pswd, path)
+def edit(path, *args):
+    data = read(pswd, path)
 
-# TODO - do not materialize sensitive data
-with open('tmp', 'wb') as f:
-    f.write(data)
+    # TODO - do not materialize sensitive data
+    with open('tmp', 'wb') as f:
+        f.write(data)
 
-try:
-    os.system(os.environ['EDITOR'] + ' tmp')
-    write(pswd, path, open('tmp', 'rb').read())
-finally:
-    os.unlink('tmp')
+    try:
+        os.system(os.environ['EDITOR'] + ' tmp')
+        write(pswd, path, open('tmp', 'rb').read())
+    finally:
+        os.unlink('tmp')
+
+globals()[sys.argv[1]](*sys.argv[2:])
