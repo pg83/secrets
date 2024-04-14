@@ -95,4 +95,7 @@ def edit(path, *args):
     finally:
         os.unlink('tmp')
 
+def cat(path, *args):
+    print(read(pswd, path).decode())
+
 globals()[sys.argv[1]](*sys.argv[2:])
