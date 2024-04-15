@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import contextlib
+import subprocess
+
+def it():
+    cur = []
+
+    for l in sys.stdin.read().split('\n'):
+        if 'BEGIN NEB' in l:
+            cur = [l]
+        elif 'END NEB' in l:
+            cur.append(l)
+            yield '\n'.join(cur)
+            cur = []
+        else:
+            cur.append(l)
+
+parts = list(it())
+
+@contextlib.contextmanager
+def memfd(name):
+    fd = os.memfd_create(name, flags=0)
+
+    try:
+        yield f'/proc/{os.getpid()}/fd/{fd}'
+    finally:
+        os.close(fd)
+
+@contextlib.contextmanager
+def multi(*args):
+    with contextlib.ExitStack() as es:
+        yield (es.enter_context(a) for a in args)
+
+with multi(memfd('crt'), memfd('key'), memfd('c'), memfd('k'), memfd('cfg')) as (crt, key, c, k, cfg):
+    with open(crt, 'w') as f:
+        f.write(parts[0])
+
+    with open(key, 'w') as f:
+        f.write(parts[1])
+
+    subprocess.check_call(['nebula-cert', 'sign', '-ca-crt', crt, '-ca-key', key, '-out-crt', 'c', '-out-key', 'k'] + sys.argv[1:])
+
+    with open('c', 'r') as f:
+        cd = f.read()
+
+    os.unlink('c')
+
+    with open('k', 'r') as f:
+        kd = f.read()
+
+    os.unlink('k')
+
+    with open(c, 'w') as f:
+        f.write(cd)
+
+    with open(k, 'w') as f:
+        f.write(kd)
+
+    data = open('config.yaml').read()
+
+    data = data.replace('./ca.crt', crt)
+    data = data.replace('./home1.crt', c)
+    data = data.replace('./home1.key', k)
+
+    with open(cfg, 'w') as f:
+        f.write(data)
+
+    subprocess.check_call(['sudo', 'nebula', '-config', cfg])
