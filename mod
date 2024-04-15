@@ -7,6 +7,16 @@ import lzma
 import base64
 import getpass
 import subprocess
+import contextlib
+
+@contextlib.contextmanager
+def memfd(name):
+    fd = os.memfd_create(name, flags=0)
+
+    try:
+        yield f'/proc/{os.getpid()}/fd/{fd}'
+    finally:
+        os.close(fd)
 
 AES = '-aes-128-cbc'
 
@@ -85,15 +95,12 @@ except Exception:
 def edit(path, *args):
     data = read(pswd, path)
 
-    # TODO - do not materialize sensitive data
-    with open('tmp', 'wb') as f:
-        f.write(data)
+    with memfd('tmp') as tmp:
+        with open(tmp, 'wb') as f:
+            f.write(data)
 
-    try:
-        os.system(os.environ['EDITOR'] + ' tmp')
-        write(pswd, path, open('tmp', 'rb').read())
-    finally:
-        os.unlink('tmp')
+        os.system(os.environ['EDITOR'] + ' ' + tmp)
+        write(pswd, path, open(tmp, 'rb').read())
 
 def cat(path, *args):
     print(read(pswd, path).decode())
