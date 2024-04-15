@@ -41,6 +41,13 @@ with multi(memfd('crt'), memfd('key'), memfd('c'), memfd('k'), memfd('cfg')) as 
     with open(key, 'w') as f:
         f.write(parts[1])
 
+    subprocess.check_call(['nebula-cert', 'sign', '-ca-crt', crt, '-ca-key', key] + sys.argv[1:])
+
+    with open('ca.crt', 'w') as f:
+        f.write(parts[0])
+
+    sys.exit(0)
+
     subprocess.check_call(['nebula-cert', 'sign', '-ca-crt', crt, '-ca-key', key, '-out-crt', 'c', '-out-key', 'k'] + sys.argv[1:])
 
     with open('c', 'r') as f:
