@@ -59,7 +59,8 @@ with multi(memfd('crt'), memfd('key'), memfd('c'), memfd('k'), memfd('cfg')) as 
     with open(k, 'w') as f:
         f.write(kd)
 
-    data = open('config.yaml').read()
+    with open('config.yaml') as f:
+        data = f.read()
 
     data = data.replace('./ca.crt', crt)
     data = data.replace('./home1.crt', c)
