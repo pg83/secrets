@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+rm -rf *.crt *.key
+./mod cat ./store > q
+cat q | ./neb -name home -ip 192.168.100.64/24
+cat q | ./neb -name mini -ip 192.168.100.65/24
+cat q | ./neb -name lab1 -ip 192.168.100.16/24
+cat q | ./neb -name lab2 -ip 192.168.100.17/24
+cat q | ./neb -name lab3 -ip 192.168.100.18/24
+cat q | ./neb -name lab4 -ip 192.168.100.19/24
+cat q | ./neb -name lh1 -ip 192.168.100.1/24
+cat q | ./neb -name lh2 -ip 192.168.100.2/24
+cat q | ./neb -name lh3 -ip 192.168.100.3/24
+cat q | ./neb -name lh4 -ip 192.168.100.4/24
+rm q
