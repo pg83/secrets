@@ -105,4 +105,7 @@ def edit(path, *args):
 def cat(path, *args):
     print(read(pswd, path).decode())
 
+def repl(path, *args):
+    write(pswd, path, sys.stdin.read().encode())
+
 globals()[sys.argv[1]](*sys.argv[2:])
